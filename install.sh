@@ -1,7 +1,13 @@
 #!/bin/sh
 
+loadkeys br-abnt2
+
+cfdisk /dev/sda
+
 mkfs.fat -F32 /dev/sda1
+fatlabel /dev/sda1 BOOT
 mkfs.btrfs /dev/sda2
+btrfs filesystem label /dev/sda2 ROOT
 
 mount /dev/sda2 /mnt
 btrfs su cr /mnt/@
@@ -25,7 +31,7 @@ echo "$(cat /etc/conf.d/keymaps | sed -e 's/keymap=.*/keymap="br-abnt2"/')" > /e
 
 echo "KEYMAP=br" >> /etc/vconsole.conf
 
-pacman -S grub os-prober efibootmgr git libressl xdg-utils alsa-utils linux-headers
+pacman -S grub os-prober efibootmgr git libressl xdg-utils alsa-utils linux-headers neovim
 echo "$(cat /etc/mkinitcpio.conf | sed -e 's/MODULES=()/MODULES=(btrfs)/')" > /etc/mkinitcpio.conf
 mkinitcpio -p linux
 
@@ -34,6 +40,7 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 useradd -mG sudo,wheel ralsei
 passwd ralsei
+passwd
 
 echo "artix" >> /etc/hostname
 echo "# Hostname fallback if /etc/hostname does not exist" > /etc/conf.d/hostname
